@@ -29,6 +29,9 @@ declus(options)
 const buffer = await declus(options);
 ```
 
+| :warning: Requires access to write extracted frames to a directory. If file-system is restricted, use the `inMemory` option to store extracted frames in memory |
+| --- |
+
 ### Overlaying an image on a GIF
 
 Grab images from absolute URLs and output Buffer data
@@ -132,6 +135,10 @@ Options passed to [gif-encoder](https://github.com/twolfson/gif-encoder).
 #### `outputDir` (string)
 
 Directory to store temporary frames extracted from the GIF, defaults to `.` (root). A new folder is created and automatically gets removed after the encoding has been finished.
+
+#### `inMemory` (boolean)
+
+Whether or not to extract frames to memory store instead of writing them to a directory. If `true`, the GIF image will render faster as the frames will be written and read from the memory instead of a directory at cost of increasing memory usage such as when dealing with large images. Useful when you do not have access to write to the file system. Defaults to `false`.
 
 #### `frameExtension` (string)
 
