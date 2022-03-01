@@ -27,7 +27,7 @@ const declus = ({
   encoderOnWriteHeader = () => {},
   encoderOnFrame = () => {},
   encoderOnFinish = () => {},
-  outputDir = './buffer',
+  outputDir = '.',
   frameExtension = 'png',
   gifData,
   imageData,
