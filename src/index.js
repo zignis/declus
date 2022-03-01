@@ -9,7 +9,7 @@ const GifEncoder = require('gif-encoder');
 const Canvas = require('canvas');
 const extractFrames = require('./utils/toFrames');
 
-module.exports = async ({
+const declus = ({
   width = 640,
   height = 360,
   repeat = 0,
@@ -195,3 +195,5 @@ module.exports = async ({
     );
   }
 });
+
+module.exports = declus;
