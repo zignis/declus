@@ -27,8 +27,8 @@ const fs = require('fs');
 const declus = require('declus');
 
 declus({
-  imageData: 'http://assets.stickpng.com/images/5ecec78673e4440004f09e77.png',
-  gifData: 'https://i0.wp.com/www.printmag.com/wp-content/uploads/2021/02/4cbe8d_f1ed2800a49649848102c68fc5a66e53mv2.gif',
+  imageData: 'https://github.com/HexM7/declus/blob/master/assets/transparentKitten.png',
+  gifData: 'https://github.com/HexM7/declus/blob/master/assets/sample.gif',
   fillImage,
 }).then((buffer) => {
   fs.createWriteStream('./myImage.gif')
