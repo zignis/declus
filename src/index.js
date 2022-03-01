@@ -8,6 +8,7 @@ const axios = require('axios');
 const GifEncoder = require('gif-encoder');
 const Canvas = require('canvas');
 const extractFrames = require('./utils/toFrames');
+const { memStore } = require('./utils/memoryStore');
 
 const declus = ({
   width = 640,
@@ -28,6 +29,7 @@ const declus = ({
   encoderOnFrame = () => {},
   encoderOnFinish = () => {},
   outputDir = '.',
+  inMemory = false,
   frameExtension = 'png',
   gifData,
   imageData,
@@ -58,19 +60,35 @@ const declus = ({
 
   try {
     // Create a temporary frame store
-    await fs.mkdirSync(dir);
+    if (!inMemory) await fs.mkdirSync(dir);
     // eslint-disable-next-line no-useless-concat
+
     await extractFrames({
       input: gifData,
       output: `${dir}/frame_%d.${frameExtension}`,
       coalesce,
+      inMemory,
     });
 
     const backPath = `${dir}/`;
     const backFilePrefix = 'frame_';
     const backFileSuffix = `.${frameExtension}`;
     const frames = [];
-    const frameCount = await fs.readdirSync(backPath).length;
+
+    let frameCount;
+
+    if (inMemory) {
+      const currentFrames = Object.keys(memStore)
+        .filter((key) => key.startsWith(dir))
+        .reduce((obj, key) => {
+          // eslint-disable-next-line no-param-reassign
+          obj[key] = memStore[key];
+          return obj;
+        }, {});
+      frameCount = Object.keys(currentFrames).length;
+    } else {
+      frameCount = await fs.readdirSync(backPath).length;
+    }
 
     // Create canvas context
     const canvas = Canvas.createCanvas(width, height);
@@ -104,7 +122,11 @@ const declus = ({
       for (const chunk of countArray) {
         const frame = chunk.toString();
         const backgroundFile = `${backPath}${backFilePrefix}${frame}${backFileSuffix}`;
-        const image = await Canvas.loadImage(backgroundFile);
+        const image = await Canvas.loadImage(
+          inMemory
+            ? memStore[backgroundFile]
+            : backgroundFile,
+        );
         frames.push(image);
       }
     }
@@ -185,14 +207,23 @@ const declus = ({
     encoder.finish();
   } finally {
     // Delete the temporary frame store
-    fs.rm(
-      dir,
-      {
-        recursive: true,
-        force: true,
-      },
-      () => {},
-    );
+    if (inMemory) {
+      // Flushing frames stored in memory
+      Object.keys(memStore).forEach((key) => {
+        if (key.startsWith(dir)) {
+          delete memStore[key];
+        }
+      });
+    } else {
+      fs.rm(
+        dir,
+        {
+          recursive: true,
+          force: true,
+        },
+        () => {},
+      );
+    }
   }
 });
 

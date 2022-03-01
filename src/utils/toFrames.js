@@ -6,6 +6,7 @@ const pify = require('pify');
 const pump = require('pump-promise');
 const getPixels = pify(require('get-pixels'));
 const savePixels = require('save-pixels');
+const { MemoryStream } = require('./memoryStore');
 
 // Supported frame formats
 const supportedFormats = new Set([
@@ -19,11 +20,18 @@ function saveFrame(data, format, filename) {
   return pump(stream, fs.createWriteStream(filename));
 }
 
+function saveFrameToMemory(data, format, filename) {
+  const stream = savePixels(data, format);
+  const memStream = new MemoryStream(filename);
+  return pump(stream, memStream);
+}
+
 module.exports = async (opts) => {
   const {
     input,
     output,
     coalesce = true,
+    inMemory = false,
   } = opts;
 
   const format = output
@@ -66,11 +74,35 @@ module.exports = async (opts) => {
       }
 
       if (output) {
-        await saveFrame(results.pick(i), format, output.replace('%d', i));
+        if (inMemory) {
+          await saveFrameToMemory(
+            results.pick(i),
+            format,
+            output.replace('%d', i),
+          );
+        } else {
+          await saveFrame(
+            results.pick(i),
+            format,
+            output.replace('%d', i),
+          );
+        }
       }
     }
   } else if (output) {
-    await saveFrame(results, format, output.replace('%d', 0));
+    if (inMemory) {
+      await saveFrameToMemory(
+        results,
+        format,
+        output.replace('%d', 0),
+      );
+    } else {
+      await saveFrame(
+        results,
+        format,
+        output.replace('%d', 0),
+      );
+    }
   }
 
   return results;
