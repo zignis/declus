@@ -27,8 +27,8 @@ const fs = require('fs');
 const declus = require('declus');
 
 declus({
-  imageData: 'https://github.com/HexM7/declus/blob/master/assets/transparentKitten.png',
-  gifData: 'https://github.com/HexM7/declus/blob/master/assets/sample.gif',
+  imageData: 'https://raw.githubusercontent.com/HexM7/declus/master/assets/transparentKitten.png',
+  gifData: 'https://raw.githubusercontent.com/HexM7/declus/master/assets/sample.gif',
   fillImage,
 }).then((buffer) => {
   fs.createWriteStream('./myImage.gif')
