@@ -61,7 +61,6 @@ const declus = ({
   try {
     // Create a temporary frame store
     if (!inMemory) await fs.mkdirSync(dir);
-    // eslint-disable-next-line no-useless-concat
 
     await extractFrames({
       input: gifData,
