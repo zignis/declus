@@ -10,17 +10,28 @@ const Canvas = require('canvas');
 const extractFrames = require('./utils/toFrames');
 const { memStore } = require('./utils/memoryStore');
 
+const isValidNumber = (parameter) => {
+  if (!parameter || Number.isNaN(parameter)) {
+    return false;
+  }
+  return true;
+};
+
 const declus = ({
-  width = 640,
-  height = 360,
+  width,
+  height,
+  baseLayer,
+  layers,
   repeat = 0,
   quality = 10,
   delay,
   frameRate,
   alphaColor,
+  alpha = true,
   coalesce = true,
-  fillImage = false,
+  stretchLayers = false,
   encoderOptions = {},
+  initCanvasContext = () => {},
   encoderOnData = () => {},
   encoderOnEnd = () => {},
   encoderOnError = () => {},
@@ -28,26 +39,40 @@ const declus = ({
   encoderOnWriteHeader = () => {},
   encoderOnFrame = () => {},
   encoderOnFinish = () => {},
+  beforeBaseLayerDraw = () => {},
+  afterBaseLayerDraw = () => {},
+  beforeLayerDraw = () => {},
+  afterLayerDraw = () => {},
   outputDir = '.',
   inMemory = false,
   frameExtension = 'png',
-  gifData,
-  imageData,
   outputFilename = nanoid(),
-  gifCoordinates = {
-    marginLeft: 0,
-    marginTop: 0,
-    width,
-    height,
-  },
-  imageCoordinates = {
-    marginLeft: 0,
-    marginTop: 0,
-    width,
-    height,
-  },
 // eslint-disable-next-line no-async-promise-executor
 }) => new Promise(async (resolve, reject) => {
+  if (!isValidNumber(height)) {
+    reject(
+      new Error(
+        'A valid "height" option must be provided',
+      ),
+    );
+  }
+
+  if (!isValidNumber(width)) {
+    reject(
+      new Error(
+        'A valid "width" option must be provided',
+      ),
+    );
+  }
+
+  if (!baseLayer || typeof baseLayer !== 'object') {
+    reject(
+      new Error(
+        'A valid "baseLayer" must be provided',
+      ),
+    );
+  }
+
   if (frameRate && delay) {
     reject(
       new Error(
@@ -63,7 +88,7 @@ const declus = ({
     if (!inMemory) await fs.mkdirSync(dir);
 
     await extractFrames({
-      input: gifData,
+      input: baseLayer.data,
       output: `${dir}/frame_%d.${frameExtension}`,
       coalesce,
       inMemory,
@@ -93,8 +118,10 @@ const declus = ({
     const canvas = Canvas.createCanvas(width, height);
     const ctx = canvas.getContext(
       '2d',
-      { alpha: true },
+      { alpha },
     );
+
+    initCanvasContext(ctx);
 
     // Initialize encoder
     const encoder = new GifEncoder(
@@ -116,7 +143,7 @@ const declus = ({
       .apply(null, { length: frameCount })
       .map(Number.call, Number);
 
-    // Render GIF frames
+    // Prepare base layer
     if (frames.length === 0) {
       for (const chunk of countArray) {
         const frame = chunk.toString();
@@ -129,22 +156,6 @@ const declus = ({
         frames.push(image);
       }
     }
-
-    let overlayBuffer;
-
-    // Get overlay buffer
-    if (Buffer.isBuffer(imageData)) {
-      overlayBuffer = imageData;
-    } else {
-      const overlayResponse = await axios.get(
-        imageData,
-        { responseType: 'arraybuffer' },
-      );
-      overlayBuffer = Buffer.from(overlayResponse.data, 'base64');
-    }
-
-    const compOverlay = new Canvas.Image();
-    compOverlay.src = overlayBuffer;
 
     const dataArray = [];
 
@@ -172,27 +183,150 @@ const declus = ({
     encoder.on('frame', encoderOnFrame);
     encoder.on('finish', encoderOnFinish);
 
-    // Render overlay
+    // Render frames
     for (const i of countArray) {
       ctx.clearRect(0, 0, width, height);
 
-      if (fillImage) {
-        ctx.drawImage(frames[i], 0, 0, width, height);
-        ctx.drawImage(compOverlay, 0, 0, width, height);
+      beforeBaseLayerDraw(
+        ctx,
+        frames[i],
+        i,
+        countArray.length,
+      );
+
+      // Draw base frame
+      if (
+        baseLayer.skipIndexes
+        && Array.isArray(baseLayer.skipIndexes)
+        && baseLayer.skipIndexes.includes(i)
+      ) {
+        // eslint-disable-next-line no-continue
+        continue;
+      } else if (
+        baseLayer.skipFunction
+        && typeof baseLayer.skipFunction === 'function'
+      ) {
+        const shouldSkip = baseLayer.skipFunction(
+          i,
+          countArray.length,
+        );
+        // eslint-disable-next-line no-continue
+        if (shouldSkip) continue;
+      } else if (
+        baseLayer.drawFunction
+        && typeof baseLayer.drawFunction === 'function'
+      ) {
+        baseLayer.drawFunction(
+          ctx,
+          frames[i],
+          i,
+          countArray.length,
+        );
+      } else if (stretchLayers) {
+        ctx.drawImage(
+          frames[i],
+          0,
+          0,
+          width,
+          height,
+        );
       } else {
         ctx.drawImage(
           frames[i],
-          gifCoordinates.marginLeft,
-          gifCoordinates.marginTop,
-          gifCoordinates.width,
-          gifCoordinates.height,
+          baseLayer.marginLeft ?? 0,
+          baseLayer.marginTop ?? 0,
+          baseLayer.width ?? width,
+          baseLayer.height ?? height,
         );
-        ctx.drawImage(
-          compOverlay,
-          imageCoordinates.marginLeft,
-          imageCoordinates.marginTop,
-          imageCoordinates.width,
-          imageCoordinates.height,
+      }
+
+      afterBaseLayerDraw(
+        ctx,
+        frames[i],
+        i,
+        countArray.length,
+      );
+
+      // Draw layers
+      for (const layer of layers) {
+        // eslint-disable-next-line no-continue
+        if (layer.disabled) continue;
+
+        let buffer;
+
+        // Get layer image buffer
+        if (Buffer.isBuffer(layer.data)) {
+          buffer = layer.data;
+        } else {
+          const overlayResponse = await axios.get(
+            layer.data,
+            { responseType: 'arraybuffer' },
+          );
+          buffer = Buffer.from(overlayResponse.data, 'base64');
+        }
+        const layerImg = new Canvas.Image();
+        layerImg.src = buffer;
+
+        beforeLayerDraw(
+          ctx,
+          layerImg,
+          i,
+          countArray.length,
+          layers.indexOf(layer),
+        );
+
+        // Custom draw function
+        if (
+          layer.skipIndexes
+          && Array.isArray(layer.skipIndexes)
+          && layer.skipIndexes.includes(i)
+        ) {
+          // eslint-disable-next-line no-continue
+          continue;
+        } else if (
+          layer.skipFunction
+          && typeof layer.skipFunction === 'function'
+        ) {
+          const shouldSkip = layer.skipFunction(
+            i,
+            countArray.length,
+          );
+          // eslint-disable-next-line no-continue
+          if (shouldSkip) continue;
+        } else if (
+          layer.drawFunction
+          && typeof layer.drawFunction === 'function'
+        ) {
+          layer.drawFunction(
+            ctx,
+            layerImg,
+            i,
+            countArray.length,
+          );
+        } else if (stretchLayers) {
+          ctx.drawImage(
+            layerImg,
+            0,
+            0,
+            width,
+            height,
+          );
+        } else {
+          ctx.drawImage(
+            layerImg,
+            layer.marginLeft ?? 0,
+            layer.marginTop ?? 0,
+            layer.width ?? width,
+            layer.height ?? height,
+          );
+        }
+
+        afterLayerDraw(
+          ctx,
+          layerImg,
+          i,
+          countArray.length,
+          layers.indexOf(layer),
         );
       }
 

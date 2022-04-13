@@ -1,7 +1,7 @@
 {
   "name": "declus",
-  "version": "1.1.2",
-  "description": "Render awesome GIF images",
+  "version": "2.0.0",
+  "description": "Create awesome image animations",
   "keywords": ["gif", "encoding", "declus", "image", "manipulation"],
   "homepage": "https://github.com/HexM7/declus#readme",
   "bugs" : "https://github.com/HexM7/declus/issues",
