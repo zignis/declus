@@ -1,6 +1,7 @@
 # Declus - GIF manipulation
 
 ![npm](https://img.shields.io/npm/v/declus?style=for-the-badge)
+![npm](https://img.shields.io/npm/dw/declus?style=for-the-badge)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/HexM7/declus?style=for-the-badge)
 ![GitHub](https://img.shields.io/github/license/HexM7/declus?style=for-the-badge)
 ![GitHub Repo stars](https://img.shields.io/github/stars/HexM7/declus?style=for-the-badge)
