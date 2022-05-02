@@ -233,10 +233,10 @@ const declus = ({
       } else {
         ctx.drawImage(
           frames[i],
-          baseLayer.marginLeft ?? 0,
-          baseLayer.marginTop ?? 0,
-          baseLayer.width ?? width,
-          baseLayer.height ?? height,
+          baseLayer.marginLeft || 0,
+          baseLayer.marginTop || 0,
+          baseLayer.width || width,
+          baseLayer.height || height,
         );
       }
 
@@ -314,10 +314,10 @@ const declus = ({
         } else {
           ctx.drawImage(
             layerImg,
-            layer.marginLeft ?? 0,
-            layer.marginTop ?? 0,
-            layer.width ?? width,
-            layer.height ?? height,
+            layer.marginLeft || 0,
+            layer.marginTop || 0,
+            layer.width || width,
+            layer.height || height,
           );
         }
 
