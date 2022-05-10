@@ -70,7 +70,7 @@ data: './sampleImage.gif',
 
 ```js
 layer: {
-  data: Buffer | URL | Path, // Required
+  data: Buffer || URL || Path, // Required
   marginLeft: Number,
   marginTop: Number,
   width: Number,
