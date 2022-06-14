@@ -1,0 +1,35 @@
+{
+    "name": "@types/pify",
+    "version": "5.0.1",
+    "description": "TypeScript definitions for pify",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/pify",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Sam Verschueren",
+            "url": "https://github.com/samverschueren",
+            "githubUsername": "samverschueren"
+        },
+        {
+            "name": "Michael Müller",
+            "url": "https://github.com/mad-mike",
+            "githubUsername": "mad-mike"
+        },
+        {
+            "name": "Christoph Müller",
+            "url": "https://github.com/c7hm4r",
+            "githubUsername": "c7hm4r"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/pify"
+    },
+    "scripts": {},
+    "dependencies": {},
+    "typesPublisherContentHash": "1c095b7176a0111708717bdc6059ea33215661dbf198100baf3f370973507af9",
+    "typeScriptVersion": "3.6"
+}
