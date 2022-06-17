@@ -1,25 +1,36 @@
 {
   "name": "declus",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Create awesome image animations",
-  "keywords": ["gif", "encoding", "declus", "image", "manipulation"],
+  "keywords": [
+    "gif",
+    "encoding",
+    "declus",
+    "image",
+    "manipulation"
+  ],
   "homepage": "https://github.com/HexM7/declus#readme",
-  "bugs" : "https://github.com/HexM7/declus/issues",
+  "bugs": "https://github.com/HexM7/declus/issues",
   "author": "HexM7",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/HexM7/declus.git"
   },
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\"",
-    "start": "node src/index.js"
+    "lint": "eslint . --ext .ts,.js",
+    "build": "tsc"
   },
   "devDependencies": {
-    "eslint": "^8.9.0",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^8.17.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.25.4"
+    "eslint-plugin-import": "^2.26.0",
+    "typescript": "^4.7.3"
   },
   "dependencies": {
     "axios": "^0.26.0",

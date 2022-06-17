@@ -1,5 +1,7 @@
 /* eslint-disable no-await-in-loop */
 
+export {};
+
 const fs = require('fs');
 const path = require('path');
 const pify = require('pify');
@@ -8,6 +10,10 @@ const getPixels = pify(require('get-pixels'));
 const savePixels = require('save-pixels');
 const { MemoryStream } = require('./memoryStore');
 
+type Format = string | undefined;
+
+type Extension = 'jpg' | 'png' | 'gif' | undefined;
+
 // Supported frame formats
 const supportedFormats = new Set([
   'jpg',
@@ -15,26 +21,29 @@ const supportedFormats = new Set([
   'gif',
 ]);
 
-function saveFrame(data, format, filename) {
+function saveFrame(data: any, format: Format, filename: string) {
   const stream = savePixels(data, format);
   return pump(stream, fs.createWriteStream(filename));
 }
 
-function saveFrameToMemory(data, format, filename) {
+function saveFrameToMemory(data: any, format: Format, filename: string) {
   const stream = savePixels(data, format);
   const memStream = new MemoryStream(filename);
   return pump(stream, memStream);
 }
 
-module.exports = async (opts) => {
-  const {
-    input,
-    output,
-    coalesce = true,
-    inMemory = false,
-  } = opts;
-
-  const format = output
+module.exports = async ({
+  input,
+  output,
+  coalesce = true,
+  inMemory = false,
+} : {
+  input: string | Buffer,
+  output: string,
+  coalesce?: boolean,
+  inMemory?: boolean,
+}): Promise<any> => {
+  const format: Extension = output
     ? path.extname(output).substring(1)
     : undefined;
 
@@ -78,13 +87,13 @@ module.exports = async (opts) => {
           await saveFrameToMemory(
             results.pick(i),
             format,
-            output.replace('%d', i),
+            output.replace('%d', String(i)),
           );
         } else {
           await saveFrame(
             results.pick(i),
             format,
-            output.replace('%d', i),
+            output.replace('%d', String(i)),
           );
         }
       }
@@ -94,13 +103,13 @@ module.exports = async (opts) => {
       await saveFrameToMemory(
         results,
         format,
-        output.replace('%d', 0),
+        output.replace('%d', '0'),
       );
     } else {
       await saveFrame(
         results,
         format,
-        output.replace('%d', 0),
+        output.replace('%d', '0'),
       );
     }
   }

@@ -1,6 +1,6 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-/* eslint-disable prefer-spread */
 
 const fs = require('fs');
 const { nanoid } = require('nanoid');
@@ -10,10 +10,65 @@ const Canvas = require('canvas');
 const extractFrames = require('./utils/toFrames');
 const { memStore } = require('./utils/memoryStore');
 
-const isValidNumber = (parameter) => {
+type DrawFunction = (
+  context: CanvasRenderingContext2D,
+  layerImg: HTMLImageElement,
+  index: number,
+  totalFrames: number,
+) => void;
+
+type SkipFunction = (
+  index: number,
+  totalFrames: number,
+) => boolean;
+
+type EncoderOptions = {
+  highWaterMark?: number
+};
+
+type BaseLayerDraw = (
+  context: CanvasRenderingContext2D,
+  layerImg: HTMLImageElement,
+  index: number,
+  totalFrames: number,
+) => void
+
+type LayerDraw = (
+  context: CanvasRenderingContext2D,
+  layerImg: HTMLImageElement,
+  index: number,
+  totalFrames: number,
+  layerIndex: number,
+) => void
+
+interface BaseLayer {
+  data: Buffer | string,
+  marginLeft?: number,
+  marginTop?: number,
+  width?: number,
+  height?: number,
+  drawFunction?: DrawFunction,
+  skipFunction?: SkipFunction,
+  skipIndexes?: Array<number>,
+}
+
+interface Layer {
+  data: Buffer | string,
+  marginLeft?: number,
+  marginTop?: number,
+  width?: number,
+  height?: number,
+  drawFunction?: DrawFunction,
+  skipFunction?: SkipFunction,
+  skipIndexes?: Array<number>,
+  disabled?: boolean,
+}
+
+const isValidNumber = (parameter: any): boolean => {
   if (!parameter || Number.isNaN(parameter)) {
     return false;
   }
+
   return true;
 };
 
@@ -47,8 +102,38 @@ const declus = ({
   inMemory = false,
   frameExtension = 'png',
   outputFilename = nanoid(),
+} : {
+  width: number,
+  height: number,
+  baseLayer: BaseLayer,
+  layers: Array<Layer>,
+  repeat?: number,
+  quality?: number,
+  delay?: number,
+  frameRate?: number,
+  alphaColor?: number,
+  alpha?: boolean,
+  coalesce?: boolean,
+  stretchLayers?: boolean,
+  encoderOptions?: EncoderOptions,
+  initCanvasContext?: (ctx: CanvasRenderingContext2D) => void,
+  encoderOnData?: (data: Buffer) => void,
+  encoderOnEnd?: () => void,
+  encoderOnError?: (error: any) => void,
+  encoderOnReadable?: () => void,
+  encoderOnWriteHeader?: () => void,
+  encoderOnFrame?: () => void,
+  encoderOnFinish?: () => void,
+  beforeBaseLayerDraw?: BaseLayerDraw,
+  afterBaseLayerDraw?: BaseLayerDraw,
+  beforeLayerDraw?: LayerDraw,
+  afterLayerDraw?: LayerDraw,
+  outputDir?: string,
+  inMemory?: boolean,
+  frameExtension?: 'png' | 'jpg' | 'gif',
+  outputFilename?: string | number,
 // eslint-disable-next-line no-async-promise-executor
-}) => new Promise(async (resolve, reject) => {
+}): Promise<Buffer | Error> => new Promise<any>(async (resolve, reject) => {
   if (!isValidNumber(height)) {
     reject(
       new Error(
@@ -85,7 +170,9 @@ const declus = ({
 
   try {
     // Create a temporary frame store
-    if (!inMemory) await fs.mkdirSync(dir);
+    if (!inMemory) {
+      await fs.mkdirSync(dir);
+    }
 
     await extractFrames({
       input: baseLayer.data,
@@ -99,27 +186,27 @@ const declus = ({
     const backFileSuffix = `.${frameExtension}`;
     const frames = [];
 
-    let frameCount;
+    let frameCount: number;
 
     if (inMemory) {
       const currentFrames = Object.keys(memStore)
         .filter((key) => key.startsWith(dir))
-        .reduce((obj, key) => {
+        .reduce((obj: any, key) => {
           // eslint-disable-next-line no-param-reassign
           obj[key] = memStore[key];
           return obj;
         }, {});
-      frameCount = Object.keys(currentFrames).length;
+      frameCount = Object.keys(currentFrames).length as number;
     } else {
-      frameCount = await fs.readdirSync(backPath).length;
+      frameCount = await fs.readdirSync(backPath).length as number;
     }
 
     // Create canvas context
-    const canvas = Canvas.createCanvas(width, height);
+    const canvas = Canvas.createCanvas(width, height) as HTMLCanvasElement;
     const ctx = canvas.getContext(
       '2d',
       { alpha },
-    );
+    ) as CanvasRenderingContext2D;
 
     initCanvasContext(ctx);
 
@@ -139,14 +226,10 @@ const declus = ({
 
     encoder.writeHeader();
 
-    const countArray = Array
-      .apply(null, { length: frameCount })
-      .map(Number.call, Number);
-
     // Prepare base layer
     if (frames.length === 0) {
-      for (const chunk of countArray) {
-        const frame = chunk.toString();
+      for (let i = 0; i < frameCount; i += 1) {
+        const frame = i.toString();
         const backgroundFile = `${backPath}${backFilePrefix}${frame}${backFileSuffix}`;
         const image = await Canvas.loadImage(
           inMemory
@@ -157,23 +240,23 @@ const declus = ({
       }
     }
 
-    const dataArray = [];
+    const dataArray: Array<Buffer> = [];
 
     // Encoder events
-    encoder.on('data', (buffer) => {
+    encoder.on('data', (buffer: Buffer) => {
       encoderOnData(buffer);
       dataArray.push(buffer);
     });
 
     encoder.on('end', () => {
       encoderOnEnd();
-      resolve(
-        Buffer.concat(dataArray),
-        `${outputFilename}.gif`,
-      );
+      resolve({
+        buffer: Buffer.concat(dataArray),
+        filename: `${outputFilename}.gif`,
+      });
     });
 
-    encoder.on('error', (error) => {
+    encoder.on('error', (error: Error) => {
       encoderOnError(error);
       reject(error);
     });
@@ -184,14 +267,14 @@ const declus = ({
     encoder.on('finish', encoderOnFinish);
 
     // Render frames
-    for (const i of countArray) {
+    for (let i = 0; i < frameCount; i += 1) {
       ctx.clearRect(0, 0, width, height);
 
       beforeBaseLayerDraw(
         ctx,
         frames[i],
         i,
-        countArray.length,
+        frameCount,
       );
 
       // Draw base frame
@@ -208,7 +291,7 @@ const declus = ({
       ) {
         const shouldSkip = baseLayer.skipFunction(
           i,
-          countArray.length,
+          frameCount,
         );
         // eslint-disable-next-line no-continue
         if (shouldSkip) continue;
@@ -220,7 +303,7 @@ const declus = ({
           ctx,
           frames[i],
           i,
-          countArray.length,
+          frameCount,
         );
       } else if (stretchLayers) {
         ctx.drawImage(
@@ -244,7 +327,7 @@ const declus = ({
         ctx,
         frames[i],
         i,
-        countArray.length,
+        frameCount,
       );
 
       // Draw layers
@@ -271,7 +354,7 @@ const declus = ({
           ctx,
           layerImg,
           i,
-          countArray.length,
+          frameCount,
           layers.indexOf(layer),
         );
 
@@ -289,7 +372,7 @@ const declus = ({
         ) {
           const shouldSkip = layer.skipFunction(
             i,
-            countArray.length,
+            frameCount,
           );
           // eslint-disable-next-line no-continue
           if (shouldSkip) continue;
@@ -301,7 +384,7 @@ const declus = ({
             ctx,
             layerImg,
             i,
-            countArray.length,
+            frameCount,
           );
         } else if (stretchLayers) {
           ctx.drawImage(
@@ -325,7 +408,7 @@ const declus = ({
           ctx,
           layerImg,
           i,
-          countArray.length,
+          frameCount,
           layers.indexOf(layer),
         );
       }

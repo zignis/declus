@@ -1,5 +1,6 @@
 # Declus - GIF manipulation
 
+![Typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![npm](https://img.shields.io/npm/v/declus?style=for-the-badge)
 ![npm](https://img.shields.io/npm/dm/declus?style=for-the-badge)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/HexM7/declus?style=for-the-badge)
