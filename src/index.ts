@@ -10,6 +10,8 @@ const Canvas = require('canvas');
 const extractFrames = require('./utils/toFrames');
 const { memStore } = require('./utils/memoryStore');
 
+import * as Types from '../../types';
+
 const isValidNumber = (parameter: any): boolean => {
   if (!parameter || Number.isNaN(parameter)) {
     return false;
@@ -51,7 +53,7 @@ const declus = ({
 } : {
   width: number,
   height: number,
-  baseLayer: BaseLayer,
+  baseLayer: Types.BaseLayer,
   layers: Array<Layer>,
   repeat?: number,
   quality?: number,
@@ -61,7 +63,7 @@ const declus = ({
   alpha?: boolean,
   coalesce?: boolean,
   stretchLayers?: boolean,
-  encoderOptions?: EncoderOptions,
+  encoderOptions?: Types.EncoderOptions,
   initCanvasContext?: (ctx: CanvasRenderingContext2D) => void,
   encoderOnData?: (data: Buffer) => void,
   encoderOnEnd?: () => void,
@@ -70,10 +72,10 @@ const declus = ({
   encoderOnWriteHeader?: () => void,
   encoderOnFrame?: () => void,
   encoderOnFinish?: () => void,
-  beforeBaseLayerDraw?: BaseLayerDraw,
-  afterBaseLayerDraw?: BaseLayerDraw,
-  beforeLayerDraw?: LayerDraw,
-  afterLayerDraw?: LayerDraw,
+  beforeBaseLayerDraw?: Types.BaseLayerDraw,
+  afterBaseLayerDraw?: Types.BaseLayerDraw,
+  beforeLayerDraw?: Types.LayerDraw,
+  afterLayerDraw?: Types.LayerDraw,
   outputDir?: string,
   inMemory?: boolean,
   frameExtension?: 'png' | 'jpg' | 'gif',
