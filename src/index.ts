@@ -49,7 +49,6 @@ const declus = ({
   outputDir = '.',
   inMemory = false,
   frameExtension = 'png',
-  outputFilename = nanoid(),
 } : {
   width: number,
   height: number,
@@ -79,7 +78,6 @@ const declus = ({
   outputDir?: string,
   inMemory?: boolean,
   frameExtension?: 'png' | 'jpg' | 'gif',
-  outputFilename?: string | number,
 // eslint-disable-next-line no-async-promise-executor
 }): Promise<Buffer | Error> => new Promise<any>(async (resolve, reject) => {
   if (!isValidNumber(height)) {
@@ -198,10 +196,7 @@ const declus = ({
 
     encoder.on('end', () => {
       encoderOnEnd();
-      resolve({
-        buffer: Buffer.concat(dataArray),
-        filename: `${outputFilename}.gif`,
-      });
+      resolve(Buffer.concat(dataArray));
     });
 
     encoder.on('error', (error: Error) => {
