@@ -10,60 +10,6 @@ const Canvas = require('canvas');
 const extractFrames = require('./utils/toFrames');
 const { memStore } = require('./utils/memoryStore');
 
-type DrawFunction = (
-  context: CanvasRenderingContext2D,
-  layerImg: HTMLImageElement,
-  index: number,
-  totalFrames: number,
-) => void;
-
-type SkipFunction = (
-  index: number,
-  totalFrames: number,
-) => boolean;
-
-interface EncoderOptions = {
-  highWaterMark?: number
-};
-
-type BaseLayerDraw = (
-  context: CanvasRenderingContext2D,
-  layerImg: HTMLImageElement,
-  index: number,
-  totalFrames: number,
-) => void
-
-type LayerDraw = (
-  context: CanvasRenderingContext2D,
-  layerImg: HTMLImageElement,
-  index: number,
-  totalFrames: number,
-  layerIndex: number,
-) => void
-
-interface BaseLayer {
-  data: Buffer | string,
-  marginLeft?: number,
-  marginTop?: number,
-  width?: number,
-  height?: number,
-  drawFunction?: DrawFunction,
-  skipFunction?: SkipFunction,
-  skipIndexes?: Array<number>,
-}
-
-interface Layer {
-  data: Buffer | string,
-  marginLeft?: number,
-  marginTop?: number,
-  width?: number,
-  height?: number,
-  drawFunction?: DrawFunction,
-  skipFunction?: SkipFunction,
-  skipIndexes?: Array<number>,
-  disabled?: boolean,
-}
-
 const isValidNumber = (parameter: any): boolean => {
   if (!parameter || Number.isNaN(parameter)) {
     return false;
