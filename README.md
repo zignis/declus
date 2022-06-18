@@ -214,10 +214,6 @@ Allowed formats:
 - `jpg`
 - `gif`(static)
 
-#### `outputFilename` string
-
-Filename for the output GIF image. Defaults to a unique ID generated through `nanoid`.
-
 ### Events
 
 #### `initCanvasContext` function(context)
