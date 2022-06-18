@@ -22,7 +22,7 @@ type SkipFunction = (
   totalFrames: number,
 ) => boolean;
 
-type EncoderOptions = {
+interface EncoderOptions = {
   highWaterMark?: number
 };
 
