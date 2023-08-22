@@ -9,13 +9,13 @@
     "image",
     "manipulation"
   ],
-  "homepage": "https://github.com/HexM7/declus#readme",
-  "bugs": "https://github.com/HexM7/declus/issues",
-  "author": "HexM7",
+  "homepage": "https://github.com/zignis/declus#readme",
+  "bugs": "https://github.com/zignis/declus/issues",
+  "author": "zignis",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HexM7/declus.git"
+    "url": "https://github.com/zignis/declus.git"
   },
   "main": "dist/index.js",
   "scripts": {
