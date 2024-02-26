@@ -3,11 +3,11 @@
 ![Typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![npm](https://img.shields.io/npm/v/declus?style=for-the-badge)
 ![npm](https://img.shields.io/npm/dm/declus?style=for-the-badge)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/HexM7/declus?style=for-the-badge)
-![GitHub](https://img.shields.io/github/license/HexM7/declus?style=for-the-badge)
-![GitHub Repo stars](https://img.shields.io/github/stars/HexM7/declus?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/HexM7/declus?style=for-the-badge)
-![GitHub Sponsors](https://img.shields.io/github/sponsors/HexM7?style=for-the-badge)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/zignis/declus?style=for-the-badge)
+![GitHub](https://img.shields.io/github/license/zignis/declus?style=for-the-badge)
+![GitHub Repo stars](https://img.shields.io/github/stars/zignis/declus?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/zignis/declus?style=for-the-badge)
+![GitHub Sponsors](https://img.shields.io/github/sponsors/zignis?style=for-the-badge)
 
 ## Playing with GIF images made much easier
 
@@ -46,11 +46,11 @@ declus({
   height: 360,
   width: 640,
   baseLayer: {
-    data: 'https://raw.githubusercontent.com/HexM7/declus/master/assets/sample.gif',
+    data: 'https://raw.githubusercontent.com/zignis/declus/master/assets/sample.gif',
   },
   layers: [
     {
-      data: 'https://raw.githubusercontent.com/HexM7/declus/master/assets/transparentKitten.png',
+      data: 'https://raw.githubusercontent.com/zignis/declus/master/assets/transparentKitten.png',
     }
   ],
   stretchLayers: true,
